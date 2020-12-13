@@ -109,10 +109,28 @@ def Run_algorithme(label, x_entrainement, t_entrainement, numero_algorithme):
     elif(numero_algorithme==7): # 7 = Quadratic Discriminant Analysis
         clf = BaggingClassifier()
 
-    clf.fit(x_entrainement[0:900],t_entrainement[0:900])
+    # Validation croisee #
+    precision_entrainement=0
+    precision_test=0
+    K=10
+    for i in range(0,K):
+        xk_entrainement = np.delete(x_entrainement, slice(int(i*(len(x_entrainement)/K)), int(i*(len(x_entrainement)/K)+(len(x_entrainement)/K))), axis=0)
+        tk_entrainement = np.delete(t_entrainement, slice(int(i*(len(t_entrainement)/K)), int(i*(len(t_entrainement)/K)+(len(t_entrainement)/K))), axis=0)
+        xk_test = x_entrainement[int(i*(len(x_entrainement)/K)):int(i*(len(x_entrainement)/K)+(len(x_entrainement)/K))]
+        tk_test = t_entrainement[int(i*(len(t_entrainement)/K)):int(i*(len(t_entrainement)/K)+(len(t_entrainement)/K))]
+        
+        clf.fit(xk_entrainement, tk_entrainement) # Entrainement
+        
+        precision_entrainement = precision_entrainement + clf.score(xk_entrainement, tk_entrainement)*100 # Precision sur les données d'entrainement
+        precision_test = precision_test + clf.score(xk_test, tk_test)*100 # Precision sur les données de test
+        
+    precision_entrainement = precision_entrainement / K
+    precision_test = precision_test / K
+        
+    print("Précision données d'entrainement : " , precision_entrainement, " %")
+    print("Précision données de test : " , precision_test, " %\n")
     
-    print("Précision données d'entrainement : " , clf.score(x_entrainement[0:900],t_entrainement[0:900])*100, " %")
-    print("Précision données de test : " , clf.score(x_entrainement[900:990],t_entrainement[900:990])*100, " %\n")
+    #return precision_test # On retourne la moyenne de la precision des donnees de test sur les 10 entrainements
     
 
 if __name__ == "__main__":
