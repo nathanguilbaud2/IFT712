@@ -3,8 +3,34 @@
 import numpy as np
 import gestion_donnees as gd
 import time
+import sys
+
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn import tree
+from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.ensemble import BaggingClassifier
 
 def main(): 
+    if len(sys.argv) < 2:
+        usage = "\n Usage: python All_2.py choix_algorithme recherche_parametres generer_soumission\
+        \n\n\t choix_algorithme:\
+        \n\t\t -1 : Tous les algorithmes\
+        \n\t\t 0 : Gradient Boosting Classifier\
+        \n\t\t 1 : Random-Forest\
+        \n\t\t 2 : ADA-Boost\
+        \n\t\t 3 : Decision-Tree\
+        \n\t\t 4 : SVM\
+        \n\t\t 5 : K-nearest neighbors\
+        \n\t\t 6 : Linear Discriminant Analysis\
+        \n\t\t 7 : Quadratic Discriminant Analysis\\n"
+        print(usage)
+        return
+
+    choix_algorithme = int(sys.argv[1])
     
     # On génère les données d'entraînement et de test
     generateur_donnees = gd.GestionDonnees()
@@ -13,11 +39,12 @@ def main():
     print("------- Fin du tri des donnees en ", time.time()-start, 'seconds')
     
     # Nous allons étudier 8 algorithmes différents
-    liste_variables=[[[0] for j in range(len(x_entrainement))] for j in range(8)]    
-    liste_variables_test=[[[0] for j in range(len(x_test))] for j in range(8)]
-    test_id=[[0] for j in range(len(x_test))]
+    liste_variables=[[[0] for j in range(len(x_entrainement))] for j in range(7)]    
+    liste_variables_test=[[[0] for j in range(len(x_test))] for j in range(7)]
     
-    # Séparation des données d'entrainement en fonction du nombre de variables choisi
+    liste_variables_label=["Utilisation de Margin seulement","Utilisation de Shape seulement","Utilisation de Texture seulement","Utilisation de Margin et Shape","Utilisation de Margin et Texture","Utilisation de Shape et Texture","Utilisation de toutes les variables"]
+    list_Algorithme_label=["~~~~~~~~~~~~~ GradientBoostingClassifier ~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~~~ Random-Forest ~~~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~~~~~ ADA-Boost ~~~~~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~~~~ Decision-Tree ~~~~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~ SVM ~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~~~~ K-nearest neighbors ~~~~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~ Linear Discriminant Analysis ~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~ Bagging Classifier ~~~~~~~~~~~~~~~~~~"]
+    
     for i in range(len(x_entrainement)):
         liste_variables[0][i]=x_entrainement[i][0:64] # Seulement Margin
         liste_variables[1][i]=x_entrainement[i][64:128] # Seulement Shape
@@ -28,10 +55,8 @@ def main():
         liste_variables[5][i]=x_entrainement[i][64:] # Seulement Shape and Texture
         
         liste_variables[6][i]=x_entrainement[i] # Tous les parametres
-    
-    # Séparation des données de test en fonction du nombre de variables choisi
+        
     for i in range(len(x_test)):
-        test_id[i] = x_test[i][0]
         liste_variables_test[0][i]=x_test[i][1:65] # Seulement Margin
         liste_variables_test[1][i]=x_test[i][65:129] # Seulement Shape
         liste_variables_test[2][i]=x_test[i][129:] # Seulement Texture
@@ -41,6 +66,54 @@ def main():
         liste_variables_test[5][i]=x_test[i][65:] # Seulement Shape and Texture
         
         liste_variables_test[6][i]=x_test[i][1:] # Tous les parametres
+       
+    if(choix_algorithme==-1): # Pour tous les algorithmes
+        for algorithme_choisi in range(len(list_Algorithme_label)):
+            print("\n",list_Algorithme_label[algorithme_choisi])
+            for variable_choisie in range(len(liste_variables)):
+                Run_algorithme(liste_variables_label[variable_choisie],liste_variables[variable_choisie],t_entrainement,algorithme_choisi)
+
+    else: # Pour un algorithme
+        print("\n",list_Algorithme_label[choix_algorithme])
+        
+        for variable_choisie in range(len(liste_variables)):
+            Run_algorithme(liste_variables_label[variable_choisie],liste_variables[variable_choisie],t_entrainement,choix_algorithme)
+    
+"""
+Fonction qui entraine un modele en fontion de l'algorithme choisi
+""" 
+def Run_algorithme(label, x_entrainement, t_entrainement, numero_algorithme):
+    print(label)
+    # Choix de l'algorithme a utiliser
+    if(numero_algorithme==0): # 0 = Gradient Boosting Classifier
+        clf = GradientBoostingClassifier()
+
+    elif(numero_algorithme==1): # 1 = Random Forest Classifier
+        clf = RandomForestClassifier()
+
+    elif(numero_algorithme==2): # 2 = ADA-Boost Classifier
+        clf = AdaBoostClassifier()
+
+    elif(numero_algorithme==3): # 3 = Decision Tree Classifier
+        clf = tree.DecisionTreeClassifier()
+
+    elif(numero_algorithme==4): # 4 = SVM
+        clf = svm.SVC()
+
+    elif(numero_algorithme==5): # 5 = K-Nearest Neighbors
+        clf = KNeighborsClassifier()
+
+    elif(numero_algorithme==6): # 6 = Linear Discriminant Analysis
+        clf = LinearDiscriminantAnalysis()
+
+    elif(numero_algorithme==7): # 7 = Quadratic Discriminant Analysis
+        clf = BaggingClassifier()
+
+    clf.fit(x_entrainement[0:900],t_entrainement[0:900])
+    
+    print("Précision données d'entrainement : " , clf.score(x_entrainement[0:900],t_entrainement[0:900])*100, " %")
+    print("Précision données de test : " , clf.score(x_entrainement[900:990],t_entrainement[900:990])*100, " %\n")
+    
 
 if __name__ == "__main__":
     main()
