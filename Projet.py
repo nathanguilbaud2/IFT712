@@ -34,7 +34,7 @@ Liste des algorithmes utilisés et leur numéro correspondant
 
 def main(): 
     if(len(sys.argv) != 4):
-        usage = "\n Usage: python All_2.py choix_algorithme recherche_parametres generer_soumission\
+        usage = "\n Usage: python Projet.py choix_algorithme recherche_parametres generer_soumission\
         \n\n\t choix_algorithme:\
         \n\t\t -1 : Tous les algorithmes\
         \n\t\t 0 : Gradient Boosting Classifier\
