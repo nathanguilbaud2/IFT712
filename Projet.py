@@ -106,15 +106,19 @@ def main():
         liste_variables_test[5][i]=x_test[i][65:] # Seulement Shape and Texture
         
         liste_variables_test[6][i]=x_test[i][1:] # Tous les parametres
-       
-    if(choix_algorithme==-1): # Pour tous les algorithmes
+     
+    # Si on sélectionne tous les algorithmes
+    if(choix_algorithme==-1):
         for algorithme_choisi in range(len(list_Algorithme_label)):
             print("\n",list_Algorithme_label[algorithme_choisi])
+            
+            # Recherche des meilleurs parametres de l'algorithme
             if(recherche_parametres==1): # On recherche les meilleurs hyperparametres
                 print("\n           Avec recherche d'hypermarametres")
                 meilleurs_parametres[algorithme_choisi] = Recherche_meilleurs_parametres(liste_variables[6], t_entrainement, liste_parametres_atester[algorithme_choisi], algorithme_choisi)
                 print("Les meilleurs parametres calculés sont : ", meilleurs_parametres[algorithme_choisi][0], " et ", meilleurs_parametres[algorithme_choisi][1],"\n")
             
+            # Pas de recherche des meilleurs parametres de l'algorithme
             else: # On prend les meilleurs parametres
                 print("\n           Sans recherche d'hypermarametres")
                 meilleurs_parametres[algorithme_choisi] = [liste_meilleurs_parametres[algorithme_choisi][0],liste_meilleurs_parametres[algorithme_choisi][1]]
@@ -135,16 +139,20 @@ def main():
         print("\n")
         plt.figure(0)
         plt.bar(Test_resultat, meilleur_resultat)
-        plt.show()           
-
+        plt.show()  
+        
+    # Si on sélectionne un algorithme
     else: # Pour un algorithme
         print("\n",list_Algorithme_label[choix_algorithme])
-        if(recherche_parametres==1): # On recherche les meilleurs hyperparametres
+          
+        # Recherche des meilleurs parametres de l'algorithme
+        if(recherche_parametres==1):
             print("\n           Avec recherche d'hypermarametres")
             meilleurs_parametres[choix_algorithme] = Recherche_meilleurs_parametres(liste_variables[6], t_entrainement, liste_parametres_atester[choix_algorithme], choix_algorithme)
             print("Les meilleurs parametres calculés sont : ", meilleurs_parametres[choix_algorithme][0], " et ", meilleurs_parametres[choix_algorithme][1],"\n")
 
-        else: # On prend les meilleurs parametres
+        # Pas de recherche des meilleurs parametres de l'algorithme
+        else:
             print("\n           Sans recherche d'hypermarametres")
             meilleurs_parametres[choix_algorithme] = [liste_meilleurs_parametres[choix_algorithme][0],liste_meilleurs_parametres[choix_algorithme][1]]
             print("Les meilleurs parametres préalablement calculés sont : ", meilleurs_parametres[choix_algorithme][0], " et ", meilleurs_parametres[choix_algorithme][1],"\n")
@@ -320,7 +328,6 @@ def Valid_croisee(clf,x_entrainement,t_entrainement):
     precision_entrainement=0
     precision_test=0
     K=10
-    plantes_fausses = []
     for i in range(0,K):
         xk_entrainement = np.delete(x_entrainement, slice(int(i*(len(x_entrainement)/K)), int(i*(len(x_entrainement)/K)+(len(x_entrainement)/K))), axis=0)
         tk_entrainement = np.delete(t_entrainement, slice(int(i*(len(t_entrainement)/K)), int(i*(len(t_entrainement)/K)+(len(t_entrainement)/K))), axis=0)
@@ -331,8 +338,6 @@ def Valid_croisee(clf,x_entrainement,t_entrainement):
         
         precision_entrainement = precision_entrainement + clf.score(xk_entrainement, tk_entrainement)*100 # Precision sur les données d'entrainement
         precision_test = precision_test + clf.score(xk_test, tk_test)*100 # Precision sur les données de test
-        
-    print("Plante la plus mal classée : ", max(set(plantes_fausses), key=plantes_fausses.count)," ", plantes_fausses.count(max(set(plantes_fausses), key=plantes_fausses.count)), " fois" )
         
     precision_entrainement = precision_entrainement / K
     precision_test = precision_test / K    
